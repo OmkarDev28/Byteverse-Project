@@ -36,6 +36,46 @@ router.post("/post", async (req, res) => {
   }
 });
 
+// POST /post/:id/upvote
+router.post("/post/:id/upvote", async (req, res) => {
+    if (!req.session.user) {
+      return res.status(401).json({ message: "Login required" });
+    }
+  
+    const postId = req.params.id;
+    const username = req.session.user.username;
+  
+    try {
+      const post = await Post.findById(postId);
+      if (!post) return res.status(404).json({ message: "Post not found" });
+  
+      const alreadyUpvoted = post.upvotedBy.includes(username);
+  
+      if (alreadyUpvoted) {
+        // User already upvoted → remove
+        post.upvotedBy = post.upvotedBy.filter(user => user !== username);
+        post.upvotes = Math.max(0, post.upvotes - 1);
+      } else {
+        // Add upvote
+        post.upvotedBy.push(username);
+        post.upvotes += 1;
+      }
+  
+      await post.save();
+  
+      res.json({
+        message: alreadyUpvoted ? "Upvote removed" : "Upvoted successfully",
+        upvotes: post.upvotes,
+        upvoted: !alreadyUpvoted
+      });
+    } catch (err) {
+      console.error("Upvote error:", err);
+      res.status(500).json({ message: "Something went wrong" });
+    }
+  });
+  
+  
+
 // Get all posts (API-style)
 router.get("/posts", async (req, res) => {
   try {
