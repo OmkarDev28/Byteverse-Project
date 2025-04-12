@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CivicSync - Civic Engagement Platform</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+</head>
+<body>
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo-container">
+                <a href="#" class="logo">
+                    <i class="fas fa-th-large"></i>
+                </a>
+            </div>
+            
+            <nav class="sidebar-nav">
+                <ul>
+                    <li>
+                        <a href="#" title="Dashboard">
+                            <i class="fas fa-th-large"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" title="Documents">
+                            <i class="fas fa-file-alt"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" title="Reports">
+                            <i class="fas fa-chart-bar"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" title="Community">
+                            <i class="fas fa-users"></i>
+                        </a>
+                    </li>
+                    <li>
+                        <a href="#" title="Settings">
+                            <i class="fas fa-cog"></i>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            
+            <div class="user-profile">
+                <div class="avatar">
+                    <img src="https://randomuser.me/api/portraits/men/32.jpg" alt="User Avatar">
+                </div>
+                <div class="user-info">
+                    <span>5 Issues</span>
+                    <span>2 Resolved</span>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="brand">
+                    <h1>CivicSync</h1>
+                </div>
+                
+                <nav class="main-nav">
+                    <ul>
+                        <li class="active"><a href="#">Dashboard</a></li>
+                        <li><a href="#">Community</a></li>
+                        <li><a href="#">Reports</a></li>
+                        <li><a href="#">About</a></li>
+                    </ul>
+                </nav>
+                
+                <div class="auth-buttons">
+                    <button class="btn btn-text">Sign In</button>
+                    <button class="btn btn-primary">Get Started</button>
+                </div>
+            </header>
+
+            <!-- Hero Section -->
+            <section class="hero-section">
+                <div class="hero-content">
+                    <h2 class="hero-title">Raise Civic Voices.<br>Resolve Together.</h2>
+                    <p class="hero-subtitle">Join the movement to improve your city, one issue at a time.</p>
+                    
+                    <div class="search-container">
+                        <div class="search-box">
+                            <i class="fas fa-search"></i>
+                            <input type="text" placeholder="Search issues or report new one">
+                        </div>
+                    </div>
+                    
+                    <div class="tags-container">
+                        <span class="tag">#Streetlight</span>
+                        <span class="tag">#RoadDamage</span>
+                        <span class="tag">#Sanitation</span>
+                        <span class="tag">#WaterSupply</span>
+                    </div>
+                    
+                    <div class="action-buttons">
+                        <button class="btn btn-primary">Raise an Issue</button>
+                        <button class="btn btn-outline">View Active Cases</button>
+                    </div>
+                </div>
+                
+                <div class="categories-grid">
+                    <div class="category-card">
+                        <div class="icon location-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <span>Location Services</span>
+                    </div>
+                    <div class="category-card">
+                        <div class="icon infrastructure-icon">
+                            <i class="fas fa-building"></i>
+                        </div>
+                        <span>Infrastructure</span>
+                    </div>
+                    <div class="category-card">
+                        <div class="icon utilities-icon">
+                            <i class="fas fa-tint"></i>
+                        </div>
+                        <span>Utilities</span>
+                    </div>
+                    <div class="category-card">
+                        <div class="icon environment-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <span>Environment</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Stats Section -->
+            <section class="stats-section">
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="stat-value">15,000+</div>
+                    <div class="stat-label">Issues Resolved</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-users"></i>
+                    </div>
+                    <div class="stat-value">200+</div>
+                    <div class="stat-label">Active Communities</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-building"></i>
+                    </div>
+                    <div class="stat-value">50+</div>
+                    <div class="stat-label">City Partnerships</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <div class="stat-value">98%</div>
+                    <div class="stat-label">Resolution Rate</div>
+                </div>
+            </section>
+
+            <!-- Issues Grid -->
+            <section class="issues-grid">
+                <!-- Issue Card 1 -->
+                <div class="issue-card">
+                    <div class="issue-image">
+                        <img src="images/road.jpeg" alt="Damaged Road Surface">
+                    </div>
+                    <div class="issue-content">
+                        <h3 class="issue-title">Damaged Road Surface on Main Street</h3>
+                        <div class="issue-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>123 Main St, Downtown</span>
+                        </div>
+                        <div class="issue-tags">
+                            <span class="issue-tag">#Road</span>
+                            <span class="issue-tag">#Maintenance</span>
+                        </div>
+                        <div class="issue-poll">
+                            <h4>How urgent is this issue?</h4>
+                            <div class="poll-options">
+                                <div class="poll-option">
+                                    <div class="poll-label">High Priority</div>
+                                    <div class="poll-bar">
+                                        <div class="poll-progress" style="width: 65%;">65%</div>
+                                    </div>
+                                </div>
+                                <div class="poll-option">
+                                    <div class="poll-label">Medium Priority</div>
+                                    <div class="poll-bar">
+                                        <div class="poll-progress" style="width: 25%;">25%</div>
+                                    </div>
+                                </div>
+                                <div class="poll-option">
+                                    <div class="poll-label">Low Priority</div>
+                                    <div class="poll-bar">
+                                        <div class="poll-progress" style="width: 10%;">10%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="poll-votes">234 votes</div>
+                        </div>
+                        <div class="issue-actions">
+                            <div class="issue-stat">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>156</span>
+                            </div>
+                            <div class="issue-stat">
+                                <i class="far fa-comment"></i>
+                                <span>23</span>
+                            </div>
+                            <button class="action-btn">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <button class="action-btn">
+                                <i class="far fa-flag"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issue Card 2 -->
+                <div class="issue-card">
+                    <div class="issue-image">
+                        <img src="images/light.jpg" alt="Broken Street Light">
+                    </div>
+                    <div class="issue-content">
+                        <h3 class="issue-title">Broken Street Light in Central Park</h3>
+                        <div class="issue-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Central Park, East Side</span>
+                        </div>
+                        <div class="issue-tags">
+                            <span class="issue-tag">#Lighting</span>
+                            <span class="issue-tag">#Safety</span>
+                        </div>
+                        <div class="issue-poll">
+                            <h4>How urgent is this issue?</h4>
+                            <div class="poll-options">
+                                <div class="poll-option">
+                                    <div class="poll-label">High Priority</div>
+                                    <div class="poll-bar">
+                                        <div class="poll-progress" style="width: 45%;">45%</div>
+                                    </div>
+                                </div>
+                                <div class="poll-option">
+                                    <div class="poll-label">Medium Priority</div>
+                                    <div class="poll-bar">
+                                        <div class="poll-progress" style="width: 40%;">40%</div>
+                                    </div>
+                                </div>
+                                <div class="poll-option">
+                                    <div class="poll-label">Low Priority</div>
+                                    <div class="poll-bar">
+                                        <div class="poll-progress" style="width: 15%;">15%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="poll-votes">189 votes</div>
+                        </div>
+                        <div class="issue-actions">
+                            <div class="issue-stat">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>134</span>
+                            </div>
+                            <div class="issue-stat">
+                                <i class="far fa-comment"></i>
+                                <span>19</span>
+                            </div>
+                            <button class="action-btn">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <button class="action-btn">
+                                <i class="far fa-flag"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Issue Card 3 -->
+                <div class="issue-card">
+                    <div class="issue-image">
+                        <img src="images/dustbin.jpeg" alt="Overflowing Trash Bins">
+                    </div>
+                    <div class="issue-content">
+                        <h3 class="issue-title">Overflowing Trash Bins at Market Square</h3>
+                        <div class="issue-location">
+                            <i class="fas fa-map-marker-alt"></i>
+                            <span>Market Square, West District</span>
+                        </div>
+                        <div class="issue-tags">
+                            <span class="issue-tag">#Sanitation</span>
+                            <span class="issue-tag">#Public Space</span>
+                        </div>
+                        <div class="issue-poll">
+                            <h4>How urgent is this issue?</h4>
+                            <div class="poll-options">
+                                <div class="poll-option">
+                                    <div class="poll-label">High Priority</div>
+                                    <div class="poll-bar">
+                                        <div class="poll-progress" style="width: 80%;">80%</div>
+                                    </div>
+                                </div>
+                                <div class="poll-option">
+                                    <div class="poll-label">Medium Priority</div>
+                                    <div class="poll-bar">
+                                        <div class="poll-progress" style="width: 15%;">15%</div>
+                                    </div>
+                                </div>
+                                <div class="poll-option">
+                                    <div class="poll-label">Low Priority</div>
+                                    <div class="poll-bar">
+                                        <div class="poll-progress" style="width: 5%;">5%</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="poll-votes">312 votes</div>
+                        </div>
+                        <div class="issue-actions">
+                            <div class="issue-stat">
+                                <i class="fas fa-thumbs-up"></i>
+                                <span>245</span>
+                            </div>
+                            <div class="issue-stat">
+                                <i class="far fa-comment"></i>
+                                <span>42</span>
+                            </div>
+                            <button class="action-btn">
+                                <i class="fas fa-share-alt"></i>
+                            </button>
+                            <button class="action-btn">
+                                <i class="far fa-flag"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </div>
+
+    <!-- Modal for Raising an Issue -->
+    <div class="modal" id="issueModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Raise a New Issue</h2>
+                <button class="close-modal">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="issueForm">
+                    <div class="form-group">
+                        <label for="issueTitle">Issue Title</label>
+                        <input type="text" id="issueTitle" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="issueCategory">Category</label>
+                        <select id="issueCategory" required>
+                            <option value="">Select a category</option>
+                            <option value="infrastructure">Infrastructure</option>
+                            <option value="roads">Roads</option>
+                            <option value="water">Water</option>
+                            <option value="electricity">Electricity</option>
+                            <option value="safety">Safety</option>
+                            <option value="environment">Environment</option>
+                            <option value="sanitation">Sanitation</option>
+                            <option value="other">Other</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label for="issueDescription">Description</label>
+                        <textarea id="issueDescription" rows="4" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label for="issueLocation">Location</label>
+                        <input type="text" id="issueLocation" required>
+                    </div>
+                    <div class="form-group">
+                        <label for="issueImage">Upload Image (optional)</label>
+                        <input type="file" id="issueImage" accept="image/*">
+                        <div class="image-preview" id="imagePreview"></div>
+                    </div>
+                    <div class="form-actions">
+                        <button type="button" class="btn btn-outline" id="cancelIssue">Cancel</button>
+                        <button type="submit" class="btn btn-primary">Submit Issue</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification System -->
+    <div class="notification" id="notification">
+        <div class="notification-content">
+            <i class="fas fa-info-circle"></i>
+            <span id="notificationMessage"></span>
+        </div>
+        <button class="close-notification">&times;</button>
+    </div>
+
+    <!-- Loading Spinner -->
+    <div class="loading-spinner" id="loadingSpinner">
+        <div class="spinner"></div>
+        <p>Loading...</p>
+    </div>
+
+
+    <script src="script.js"></script>
+</body>
+</html>
