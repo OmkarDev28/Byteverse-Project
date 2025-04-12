@@ -8,6 +8,31 @@ router.get("/login", (req, res) => {
   res.sendFile("login.html", { root: "public" });
 });
 
+router.post("/register", async (req, res) => {
+  const { username, email, password } = req.body;
+
+  try {
+    // Check if the username already exists
+    const existingUser = await User.findOne({ username });
+    if (existingUser) {
+      return res.status(400).send("❌ Username already exists");
+    }
+
+    // Create new user
+    const newUser = new User({
+      username,
+      email,
+      password  // Ideally, you should hash the password before storing it
+    });
+
+    await newUser.save();
+    res.redirect("/login");  // Redirect to login after successful registration
+  } catch (err) {
+    console.error("Registration Error:", err);
+    res.status(500).send("❌ Server error during registration");
+  }
+});
+
 // Handle login submission
 router.post("/login", async (req, res) => {
   const { username, password } = req.body;

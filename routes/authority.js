@@ -12,8 +12,8 @@ function isAuthority(req, res, next) {
   }
 }
 
-// Authority Dashboard Route
-router.get("/dashboard", isAuthority, async (req, res) => {
+// Default Authority Dashboard Route (for /authority-dashboard)
+router.get("/", isAuthority, async (req, res) => {
   try {
     const totalPosts = await Post.countDocuments();
     const totalUsers = await User.countDocuments();
