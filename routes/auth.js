@@ -13,34 +13,37 @@ router.post("/login", async (req, res) => {
   const { username, password } = req.body;
 
   try {
-    // Look for the user by username
     const user = await User.findOne({ username });
 
     if (!user) {
       return res.status(400).send("❌ User not found");
     }
 
-    // Compare password with stored password (assuming plain text here)
     if (user.password !== password) {
       return res.status(401).send("❌ Incorrect password");
     }
 
-    // Save the user details in the session for later use (e.g., for displaying username on the feed)
     req.session.user = {
       _id: user._id,
       username: user.username,
       role: user.role
     };
 
-    console.log(`🔐 Logged in as ${user.username}`);
+    console.log(`🔐 Logged in as ${user.username} [${user.role}]`);
 
-    // After successful login, redirect to the feed page
-    res.redirect("/feed");  
+    // 🔄 Redirect based on role
+    if (user.role === "authority") {
+      return res.redirect("/authority-dashboard");
+    }  else {
+      return res.redirect("/feed");
+    }
+
   } catch (err) {
     console.error("Login Error:", err);
     res.status(500).send("❌ Server error during login");
   }
 });
+
 
 // Logout route
 router.get("/logout", (req, res) => {
