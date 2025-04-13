@@ -16,6 +16,14 @@ Use the following credentials to explore the platform:
 - **Username:** shubham  
 - **Password:** 1234
 
+## 🚀 Current Features
+
+- 👥 User and Authority login system  
+- 📝 Users can create posts (feeds) about issues  
+- 🗃️ Feeds are visible in a structured, card-based layout  
+- 🧑‍💼 Authority dashboard to view and manage all user feeds  
+- 🔐 Secure authentication for both users and authorities  
+- ✨ Clean and modern UI for login and registration pages  
 
 ## 🚀 Features
 
