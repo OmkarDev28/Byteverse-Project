@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Review Posts</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f7f7f7;
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    .post {
+      background: #fff;
+      padding: 15px;
+      margin-bottom: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 5px rgba(0, 0, 0, 0.1);
+    }
+    .status-form {
+      margin-top: 10px;
+    }
+    .status-form select,
+    .status-form button {
+      padding: 8px;
+      font-size: 14px;
+      margin-top: 10px;
+    }
+    .status-form button {
+      cursor: pointer;
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      border-radius: 5px;
+    }
+    .status-form button:hover {
+      background-color: #45a049;
+    }
+  </style>
+</head>
+<body>
+  <h1>Review Posts</h1>
+  <a href="/authority-dashboard">← Back to Dashboard</a>
+  <% posts.forEach(post => { %>
+    <div class="post">
+      <p><strong>Author:</strong> <%= post.author %></p>
+      <p><strong>Content:</strong> <%= post.content %></p>
+      <p><strong>Status:</strong> <%= post.status || "pending" %></p>
+
+      <!-- Status Change Form -->
+      <form class="status-form" action="/authority-dashboard/review-posts/<%= post._id %>/status" method="POST">
+        <label for="newStatus">Change status:</label>
+        <select name="newStatus" id="newStatus">
+          <option value="pending" <%= post.status === "pending" ? "selected" : "" %>>Pending</option>
+          <option value="in_progress" <%= post.status === "in_progress" ? "selected" : "" %>>In Progress</option>
+          <option value="approved" <%= post.status === "approved" ? "selected" : "" %>>Approved</option>
+          <option value="declined" <%= post.status === "declined" ? "selected" : "" %>>Declined</option>
+        </select>
+        <button type="submit">Update</button>
+      </form>
+    </div>
+  <% }); %>
+
+  
+</body>
+</html>
