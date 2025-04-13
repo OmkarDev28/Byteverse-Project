@@ -3,6 +3,8 @@
 <head>
   <meta charset="UTF-8">
   <title>Feed</title>
+  <!-- Ensure Font Awesome CDN is correctly included (for future reference if needed) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css" integrity="sha512-3Q+Xhdg4f1N8XhqbSvZmHVyD0jrpxokF7jjm0jm27yfaZc5vHcz1B6jjM25VQihDO3F9GGa5OJlU0HlLBVmHcQ==" crossorigin="anonymous" referrerpolicy="no-referrer" />
   <style>
     body {
       font-family: Arial, sans-serif;
@@ -133,14 +135,6 @@
       background-color: #2980b9;
     }
 
-    /* Ensure user-info container is displayed */
-    #user-info {
-      display: block;
-      text-align: center;
-      margin-bottom: 20px;
-      font-size: 16px;
-    }
-
     /* Status Styling */
     .status {
       font-weight: bold;
@@ -161,16 +155,51 @@
     .declined {
       color: red;
     }
+
+    /* Filter dropdown */
+    #statusFilter {
+      padding: 6px;
+      font-size: 16px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+
+    #filter-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+
+    #profile-btn {
+  background-color: #3498db; /* Blue background */
+  
+  color:red;
+  padding: 10px 20px; /* Padding for size */
+  border-radius: 4px; /* Rounded corners */
+  font-size: 14px; /* Font size */
+  text-align: center; /* Center text */
+  text-decoration: none; /* Remove underline */
+  display: inline-block; /* Inline-block for better layout control */
+  transition: background-color 0.3s, transform 0.3s; /* Smooth transition */
+}
+
+#profile-btn:hover {
+  background-color: #2980b9; /* Darker blue on hover */
+  transform: translateY(-2px); /* Slight lift effect */
+}
+
   </style>
 </head>
 <body>
   <h1>Welcome to the Feed</h1>
 
-  <!-- Check if the user is logged in -->
   <div id="user-info">
-    <p>Logged in as: <span id="username"></span></p>
+    <p>
+      Logged in as: <span id="username"></span>
+      <!-- Removed icon, replaced with text -->
+      <br>
+      <a href="/profile">Visit Profile</a>
+    </p>
     <div class="user-action-buttons">
-      <!-- Profile Button Styled as a Button -->
       <a href="/profile" id="profile-btn">Profile</a>
       <a href="/logout" id="logout-btn">Logout</a>
     </div>
@@ -178,36 +207,58 @@
 
   <a href="/create" class="create-post-link">+ Create New Post</a><br><br>
 
-  <h2>Posts</h2>
+  <h2 style="text-align:center;">Posts</h2>
+
+  <!-- Filter dropdown -->
+  <div id="filter-container">
+    <label for="statusFilter">Filter by Status:</label>
+    <select id="statusFilter">
+      <option value="">All</option>
+      <option value="pending">Pending</option>
+      <option value="in_progress">In Progress</option>
+      <option value="approved">Approved</option>
+      <option value="declined">Declined</option>
+    </select>
+  </div>
+
   <div id="posts-container"></div>
 
   <script>
-    // Fetch posts from the server
-    fetch('/posts')
-      .then(res => res.json())
-      .then(posts => {
-        const postsContainer = document.getElementById("posts-container");
+    function loadPosts(status = "") {
+      fetch(`/posts${status ? `?status=${status}` : ""}`)
+        .then(res => res.json())
+        .then(posts => {
+          const postsContainer = document.getElementById("posts-container");
+          postsContainer.innerHTML = "";
 
-        // Dynamically generate each post in the feed
-        posts.forEach(post => {
-          const postDiv = document.createElement("div");
-          postDiv.classList.add("post");
+          posts.forEach(post => {
+            const postDiv = document.createElement("div");
+            postDiv.classList.add("post");
 
-          // Determine the class for status
-          let statusClass = post.status.toLowerCase().replace("_", " ");
+            let statusClass = post.status.toLowerCase().replace(" ", "_");
 
-          postDiv.innerHTML = `
-            <p><strong>${post.author}</strong>: ${post.content}</p>
-            <div><strong>Status:</strong> <span class="status ${statusClass}">${post.status.charAt(0).toUpperCase() + post.status.slice(1)}</span></div>
-            <div>
-              <button class="upvote-btn" onclick="upvotePost('${post._id}')">Upvote</button>
-              <span class="upvote-count">${post.upvotes || 0} Upvotes</span>
-            </div>
-            <hr>
-          `;
-          postsContainer.appendChild(postDiv);
+            postDiv.innerHTML = ` 
+              <p><strong>${post.author}</strong>: ${post.content}</p>
+              <div><strong>Status:</strong> <span class="status ${statusClass}">${post.status.charAt(0).toUpperCase() + post.status.slice(1)}</span></div>
+              <div>
+                <button class="upvote-btn" onclick="upvotePost('${post._id}')">Upvote</button>
+                <span class="upvote-count">${post.upvotes || 0} Upvotes</span>
+              </div>
+              <hr>
+            `;
+            postsContainer.appendChild(postDiv);
+          });
         });
-      });
+    }
+
+    // Load all posts on page load
+    loadPosts();
+
+    // Filter posts on dropdown change
+    document.getElementById("statusFilter").addEventListener("change", function () {
+      const selectedStatus = this.value;
+      loadPosts(selectedStatus);
+    });
 
     // Upvote function
     function upvotePost(postId) {
@@ -216,7 +267,6 @@
       })
         .then(response => response.json())
         .then(data => {
-          // Find the post element by postId and update the upvote count
           const postElement = document.querySelector(`button[onclick="upvotePost('${postId}')"]`).parentElement;
           const upvoteCountElement = postElement.querySelector('.upvote-count');
           upvoteCountElement.textContent = `${data.upvotes || 0} Upvotes`;
@@ -226,6 +276,7 @@
         });
     }
 
+    // Show username from localStorage
     const username = localStorage.getItem("username");
     if (username) {
       document.getElementById("username").innerText = username;

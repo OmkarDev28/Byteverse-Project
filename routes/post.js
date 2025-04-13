@@ -1,44 +1,33 @@
 const express = require("express");
 const router = express.Router();
 const Post = require("../models/Post");
+const User = require("../models/User"); // Required for upvote author logic
 
 // Create a new post
 router.post("/post", async (req, res) => {
   const { content } = req.body;
 
-  // Check if user is logged in (session check)
   if (!req.session.user) {
     return res.status(401).send("You must be logged in to post");
   }
 
   const author = req.session.user.username;
 
-  // Ensure post content is not empty
   if (!content?.trim()) {
     return res.status(400).send("Post content can't be empty");
   }
 
   try {
-    // Create a new post and save it to the database
-    const post = new Post({
-      content,
-      author,
-    });
-
-    // Save the post to MongoDB
+    const post = new Post({ content, author });
     await post.save();
-    
-    // Return the saved post as JSON
-    res.status(201).json(post); 
+    res.status(201).json(post);
   } catch (err) {
     console.error(err);
     res.status(500).send("Error creating post");
   }
 });
 
-
-
-// POST /post/:id/upvote
+// Upvote a post
 router.post("/:postId/upvote", async (req, res) => {
   try {
     const post = await Post.findById(req.params.postId);
@@ -47,7 +36,7 @@ router.post("/:postId/upvote", async (req, res) => {
     post.upvotes = (post.upvotes || 0) + 1;
     await post.save();
 
-    const author = await User.findById(post.author);
+    const author = await User.findOne({ username: post.author });
     if (author) {
       author.upvotesReceived = (author.upvotesReceived || 0) + 1;
 
@@ -64,20 +53,22 @@ router.post("/:postId/upvote", async (req, res) => {
       await author.save();
     }
 
-    res.redirect("back");
+    // For frontend fetch API, return JSON instead of redirect
+    res.json({ upvotes: post.upvotes });
   } catch (err) {
     console.error("Upvote error:", err);
     res.status(500).send("Server error");
   }
 });
 
-  
-
-// Get all posts (API-style)
+// Get all posts, with optional status filtering
 router.get("/posts", async (req, res) => {
   try {
-    const posts = await Post.find().sort({ createdAt: -1 }); // Get posts in descending order of creation time
-    res.json(posts); // Return posts as JSON
+    const { status } = req.query;
+    const filter = status ? { status: status.toLowerCase() } : {};
+
+    const posts = await Post.find(filter).sort({ createdAt: -1 });
+    res.json(posts);
   } catch (err) {
     console.error(err);
     res.status(500).send("Error fetching posts");

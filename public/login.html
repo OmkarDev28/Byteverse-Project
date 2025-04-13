@@ -1,29 +1,39 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Login</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Parivartan - Login</title>
   <style>
     body {
-      font-family: Arial, sans-serif;
-      background: #f4f4f4;
+      font-family: 'Arial', sans-serif;
+      background: linear-gradient(135deg, #6d7fcc, #4d88c2);
       display: flex;
       justify-content: center;
       align-items: center;
       height: 100vh;
       margin: 0;
+      color: #fff;
+      overflow: hidden;
     }
 
     .login-container {
-      background: white;
+      background: rgba(255, 255, 255, 0.9);
       padding: 30px 40px;
       border-radius: 10px;
-      box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
-      width: 300px;
+      box-shadow: 0 8px 15px rgba(0, 0, 0, 0.2);
+      width: 380px;
+      max-width: 100%;
       text-align: center;
+      position: relative;
+      z-index: 2;
     }
 
     h2 {
       margin-bottom: 20px;
+      color: #4d88c2;
+      font-size: 24px;
+      font-weight: 600;
     }
 
     label {
@@ -31,57 +41,107 @@
       text-align: left;
       margin-bottom: 5px;
       font-weight: bold;
+      color: #333;
     }
 
     input[type="text"],
     input[type="password"] {
       width: 100%;
-      padding: 8px;
-      margin-bottom: 15px;
-      border: 1px solid #ccc;
-      border-radius: 5px;
+      padding: 12px;
+      margin-bottom: 20px;
+      border: 1px solid #ddd;
+      border-radius: 8px;
+      font-size: 16px;
+      box-sizing: border-box;
     }
 
     button {
       width: 100%;
-      padding: 10px;
-      background-color: #007bff;
+      padding: 12px;
+      background-color: #4d88c2;
       color: white;
       border: none;
-      border-radius: 5px;
+      border-radius: 8px;
+      font-size: 16px;
       cursor: pointer;
+      transition: background-color 0.3s;
     }
 
     button:hover {
-      background-color: #0056b3;
+      background-color: #3c6d9d;
     }
 
     .register-link {
       margin-top: 15px;
-      display: block;
       font-size: 14px;
+      color: #333;
     }
 
     .register-link a {
-      color: #007bff;
+      color: #4d88c2;
       text-decoration: none;
+      font-weight: bold;
     }
 
     .register-link a:hover {
       text-decoration: underline;
     }
+
+    /* Side image */
+    .side-image {
+      position: absolute;
+      top: 0;
+      right: 0;
+      height: 100%;
+      width: 50%;
+      background-image: url('https://source.unsplash.com/800x1200/?nature');
+      background-size: cover;
+      background-position: center;
+      filter: brightness(60%);
+      border-top-right-radius: 10px;
+    }
+
+    /* Mobile responsiveness */
+    @media (max-width: 768px) {
+      .login-container {
+        width: 90%;
+        padding: 20px;
+      }
+
+      h2 {
+        font-size: 20px;
+      }
+
+      button {
+        font-size: 14px;
+      }
+
+      .side-image {
+        width: 0;
+        display: none;
+      }
+    }
+
+    /* Additional small adjustments */
+    .content-wrapper {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+    }
   </style>
 </head>
 <body>
+  <div class="side-image"></div>
   <div class="login-container">
-    <h2>Login</h2>
+    <h2>Parivartan - Login</h2>
     <form action="/login" method="POST">
-      <label>Username:</label>
-      <input type="text" name="username" required>
-      
-      <label>Password:</label>
-      <input type="password" name="password" required>
-      
+      <label for="username">Username:</label>
+      <input type="text" id="username" name="username" required>
+
+      <label for="password">Password:</label>
+      <input type="password" id="password" name="password" required>
+
       <button type="submit">Login</button>
     </form>
     <div class="register-link">
