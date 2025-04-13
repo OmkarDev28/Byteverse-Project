@@ -35,3 +35,18 @@ Use the following credentials to explore the platform:
 
 ## 📂 Folder Structure
 Byteverse-Project/ │ ├── models/ # Mongoose models or schema definitions ├── routes/ # Express route handlers ├── views/ # EJS templates ├── public/ # Static assets (CSS, JS, Images) ├── templates/ # Additional layout or partial templates ├── .env # Environment configuration ├── server.js # Main application entry point └── package.json # NPM dependencies and scripts
+
+## 🔮 Future Work
+
+Here are some features and improvements planned for future updates:
+
+- ✅ Add profile pages for users and authorities
+- 🗣️ Implement chatbot response history and context awareness
+- 📍 Location-based feed filtering for more relevant content
+- 🖼️ Allow users to upload images or videos in feeds
+- 📊 Add analytics dashboard for authorities
+- 🔐 Role-based access control improvements
+- 📨 Email verification and password recovery system
+- 🌐 Multilingual support for a wider audience
+- 📱 Create a mobile-friendly responsive design or mobile app
+
