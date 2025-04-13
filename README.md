@@ -4,6 +4,10 @@ A full-stack web application built with Node.js, Express.js, and EJS. This proje
 
 You can check out my project here: [Parivartan](https://byteverse-project.onrender.com/login.html)
 
+## Demo
+
+[Click here to see the live demo](https://drive.google.com/file/d/1jyqC7eYimKhGQFx04hNNe3xSeCw_1Do9/view?usp=sharing)
+
 ## 🧪 Demo Login Credentials
 
 Use the following credentials to explore the platform:
