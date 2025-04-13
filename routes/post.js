@@ -36,44 +36,41 @@ router.post("/post", async (req, res) => {
   }
 });
 
+
+
 // POST /post/:id/upvote
-router.post("/post/:id/upvote", async (req, res) => {
-    if (!req.session.user) {
-      return res.status(401).json({ message: "Login required" });
-    }
-  
-    const postId = req.params.id;
-    const username = req.session.user.username;
-  
-    try {
-      const post = await Post.findById(postId);
-      if (!post) return res.status(404).json({ message: "Post not found" });
-  
-      const alreadyUpvoted = post.upvotedBy.includes(username);
-  
-      if (alreadyUpvoted) {
-        // User already upvoted → remove
-        post.upvotedBy = post.upvotedBy.filter(user => user !== username);
-        post.upvotes = Math.max(0, post.upvotes - 1);
+router.post("/:postId/upvote", async (req, res) => {
+  try {
+    const post = await Post.findById(req.params.postId);
+    if (!post) return res.status(404).send("Post not found");
+
+    post.upvotes = (post.upvotes || 0) + 1;
+    await post.save();
+
+    const author = await User.findById(post.author);
+    if (author) {
+      author.upvotesReceived = (author.upvotesReceived || 0) + 1;
+
+      if (author.upvotesReceived >= 50) {
+        author.title = "Influencer";
+      } else if (author.upvotesReceived >= 20) {
+        author.title = "Popular";
+      } else if (author.upvotesReceived >= 10) {
+        author.title = "Contributor";
       } else {
-        // Add upvote
-        post.upvotedBy.push(username);
-        post.upvotes += 1;
+        author.title = "Newbie";
       }
-  
-      await post.save();
-  
-      res.json({
-        message: alreadyUpvoted ? "Upvote removed" : "Upvoted successfully",
-        upvotes: post.upvotes,
-        upvoted: !alreadyUpvoted
-      });
-    } catch (err) {
-      console.error("Upvote error:", err);
-      res.status(500).json({ message: "Something went wrong" });
+
+      await author.save();
     }
-  });
-  
+
+    res.redirect("back");
+  } catch (err) {
+    console.error("Upvote error:", err);
+    res.status(500).send("Server error");
+  }
+});
+
   
 
 // Get all posts (API-style)

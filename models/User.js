@@ -14,6 +14,9 @@ const userSchema = new mongoose.Schema({
     type: String,
     enum: ['user', 'authority'],
     default: 'user'
+  },
+  upvotesReceived: { 
+    type: Number, default: 0 
   }
 });
 

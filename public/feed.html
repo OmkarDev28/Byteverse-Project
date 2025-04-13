@@ -73,10 +73,17 @@
       display: block;
       margin-top: 30px;
       color: #e67e22;
+      border: 2px solid #e67e22;
+      padding: 10px;
+      border-radius: 4px;
+      width: 200px;
+      margin: 20px auto;
+      transition: background-color 0.3s;
     }
 
     .create-post-link:hover {
-      color: #d35400;
+      color: #fff;
+      background-color: #e67e22;
     }
 
     #posts-container {
@@ -103,6 +110,57 @@
       font-size: 16px;
       margin-left: 10px;
     }
+
+    .user-action-buttons {
+      display: flex;
+      justify-content: center;
+      gap: 20px;
+      margin-bottom: 20px;
+    }
+
+    .user-action-buttons a {
+      background-color: #3498db;
+      color: white;
+      padding: 10px 20px;
+      text-align: center;
+      border-radius: 4px;
+      font-size: 14px;
+      text-decoration: none;
+      transition: background-color 0.3s;
+    }
+
+    .user-action-buttons a:hover {
+      background-color: #2980b9;
+    }
+
+    /* Ensure user-info container is displayed */
+    #user-info {
+      display: block;
+      text-align: center;
+      margin-bottom: 20px;
+      font-size: 16px;
+    }
+
+    /* Status Styling */
+    .status {
+      font-weight: bold;
+    }
+
+    .pending {
+      color: orange;
+    }
+
+    .in_progress {
+      color: blue;
+    }
+
+    .approved {
+      color: green;
+    }
+
+    .declined {
+      color: red;
+    }
   </style>
 </head>
 <body>
@@ -111,7 +169,11 @@
   <!-- Check if the user is logged in -->
   <div id="user-info">
     <p>Logged in as: <span id="username"></span></p>
-    <a href="/logout">Logout</a>
+    <div class="user-action-buttons">
+      <!-- Profile Button Styled as a Button -->
+      <a href="/profile" id="profile-btn">Profile</a>
+      <a href="/logout" id="logout-btn">Logout</a>
+    </div>
   </div>
 
   <a href="/create" class="create-post-link">+ Create New Post</a><br><br>
@@ -130,8 +192,13 @@
         posts.forEach(post => {
           const postDiv = document.createElement("div");
           postDiv.classList.add("post");
+
+          // Determine the class for status
+          let statusClass = post.status.toLowerCase().replace("_", " ");
+
           postDiv.innerHTML = `
             <p><strong>${post.author}</strong>: ${post.content}</p>
+            <div><strong>Status:</strong> <span class="status ${statusClass}">${post.status.charAt(0).toUpperCase() + post.status.slice(1)}</span></div>
             <div>
               <button class="upvote-btn" onclick="upvotePost('${post._id}')">Upvote</button>
               <span class="upvote-count">${post.upvotes || 0} Upvotes</span>
