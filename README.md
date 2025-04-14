@@ -2,7 +2,7 @@
 
 A full-stack web application built with Node.js, Express.js, and EJS. This project demonstrates the use of dynamic routing, templating, and MVC architecture to build a responsive and scalable web platform.
 
-You can check out my project here: [Parivartan](https://byteverse-project.onrender.com/login.html)
+You can check out our project here: [Parivartan](https://byteverse-project.onrender.com/login.html)
 
 ## Demo
 
