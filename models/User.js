@@ -17,7 +17,12 @@ const userSchema = new mongoose.Schema({
   },
   upvotesReceived: { 
     type: Number, default: 0 
+  },
+  title: { 
+    type: String, default: "Newbie" 
   }
+
+  
 });
 
 module.exports = mongoose.model("User", userSchema);
