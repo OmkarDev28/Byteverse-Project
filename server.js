@@ -8,7 +8,6 @@ import postRoutes from "./backend/routes/postRoutes.js";
 import commentRoutes from "./backend/routes/commentRoutes.js";
 
 const app = express();
-const port = 3000;
 
 app.use(express.json());
 
