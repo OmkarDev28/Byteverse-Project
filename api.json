@@ -1,3 +1,4 @@
+https://byteverse-project-1.onrender.com
 {
   "POST /api/register": {
     "description": "Registers a new user",
@@ -184,3 +185,4 @@
     }
   }
 }
+
