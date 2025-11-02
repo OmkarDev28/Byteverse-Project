@@ -4,6 +4,8 @@ import session from "express-session";
 import passport from "passport";
 import authRoutes from "./backend/routes/authRoutes.js";
 import userRoutes from "./backend/routes/userRoutes.js";
+import postRoutes from "./backend/routes/postRoutes.js";
+import commentRoutes from "./backend/routes/commentRoutes.js";
 
 const app = express();
 const port = 3000;
@@ -24,5 +26,7 @@ app.use(passport.session());
 // Routes
 app.use( authRoutes);
 app.use(userRoutes);
+app.use(postRoutes)
+app.use(commentRoutes);
 
 app.listen(port, () => console.log(`Server running on http://localhost:${port}`));
