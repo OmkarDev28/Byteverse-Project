@@ -2,15 +2,21 @@
 import express from "express";
 import session from "express-session";
 import passport from "passport";
+import mongoose from "mongoose";
+import connectDB from "./backend/config/mongoDb.js";
 import authRoutes from "./backend/routes/authRoutes.js";
 import userRoutes from "./backend/routes/userRoutes.js";
 import postRoutes from "./backend/routes/postRoutes.js";
 import commentRoutes from "./backend/routes/commentRoutes.js";
 
 const app = express();
-const port = 3000;
+
 
 app.use(express.json());
+
+connectDB();
+console.log('fs');
+
 
 app.use(
   session({
@@ -19,6 +25,9 @@ app.use(
     saveUninitialized: false,
   })
 );
+
+
+    
 
 app.use(passport.initialize());
 app.use(passport.session());
