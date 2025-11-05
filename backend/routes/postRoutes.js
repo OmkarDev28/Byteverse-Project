@@ -59,32 +59,36 @@ router.post("/api/upload-post", verifyAPIKey, upload.single("file"), async (req,
   }
 });
 
-router.put('/api/edit-post/:postID', verifyAPIKey, async (req, res) => {
+router.put("/api/edit-post/:postID", verifyAPIKey, async (req, res) => {
   const postId = req.params.postID;
-  const userID = req.body.id;
-  const updatedPostCaption = req.body.updatedPostCaption;
+  const { id: userID, updatedPostCaption } = req.body;
 
   try {
-    const {data: validUser, error: validUserError} = await supabase.from('posts')
-                                                                   .select('post_id, user_id')
-                                                                   .eq('post_id', postId)
-                                                                   
-                                                                   
+    const { data: post, error: fetchError } = await supabase
+      .from("posts")
+      .select("user_id")
+      .eq("post_id", postId)
+      .single();
 
-    if (validUser.length == 0){
-      return res.status(400).json({ message: "You can edit only your posts."});
-    }             
-    
-    const {data: updatedPostData, error: UpdatedPostError} = await supabase.from('posts')
-                                                                           .update({caption: updatedPostCaption})
-                                                                           .eq('post_id', postId)
-                                                                           .select('*')
-    
+    if (fetchError) throw fetchError;
+    if (!post || post.user_id !== userID) {
+      return res.status(403).json({ message: "You can edit only your posts." });
+    }
+
+    const { data: updatedPost, error: updateError } = await supabase
+      .from("posts")
+      .update({ caption: updatedPostCaption })
+      .eq("post_id", postId)
+      .select("*");
+
+    if (updateError) throw updateError;
+
+    res.json({ message: "Post updated successfully", updatedPost });
   } catch (err) {
     console.error("Server error:", err);
     res.status(500).json({ message: "Internal server error." });
   }
-})
+});
 
 
 

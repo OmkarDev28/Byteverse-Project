@@ -167,55 +167,125 @@ router.post("/api/upload-pfp/:userID", verifyAPIKey, upload.single("file"), asyn
 
 });
 
-router.patch("/api/update-pfp/:userID", verifyAPIKey, upload.single("file"), async (req, res) => {
-  const userID = req.params.userID;
-  const file = req.file;
 
-  if (!file) return res.status(400).json({ error: "No file uploaded." });
-  if (!userID) return res.status(400).json({ error: "User ID is required." });
+router.patch(
+  "/api/update-user/:userID",
+  verifyAPIKey,
+  upload.single("file"),
+  async (req, res) => {
+    const userID = req.params.userID;
+    const file = req.file;
+    const updates = req.body;
 
-  try {
-    const filename = `pfp-${userID}.jpg`;
-    const filePath = `user_pfp/${filename}`;
+    if (!userID) {
+      return res.status(400).json({ error: "User ID is required." });
+    }
 
-    // 1️⃣ Upload or replace file in Supabase Storage
-    const { error: uploadError } = await supabase.storage
-      .from("photo_app")
-      .upload(filePath, file.buffer, {
-        contentType: file.mimetype,
-        upsert: true, // replaces if already exists
+    try {
+      // 1️⃣ Find current user in MongoDB
+      const user = await User.findOne({ userId: userID });
+      if (!user) {
+        return res.status(404).json({ error: "User not found." });
+      }
+
+      let profilePicUrl;
+      let filePath;
+
+      // 2️⃣ Handle profile picture if uploaded
+      if (file) {
+        // 🧹 Remove previous file if exists
+        if (user.pfpPath) {
+          const { error: removeError } = await supabase.storage
+            .from("photo_app")
+            .remove([user.pfpPath]);
+
+          if (removeError) {
+            console.warn("⚠️ Failed to remove old profile picture:", removeError.message);
+          } else {
+            console.log("✅ Old profile picture removed:", user.pfpPath);
+          }
+        }
+
+        // 📤 Upload new file to Supabase
+        const filename = `pfp-${userID}-${Date.now()}.jpg`;
+        filePath = `user_pfp/${filename}`;
+
+        const { error: uploadError } = await supabase.storage
+          .from("photo_app")
+          .upload(filePath, file.buffer, {
+            contentType: file.mimetype,
+            upsert: true,
+          });
+
+        if (uploadError) {
+          console.error("❌ Upload error:", uploadError.message);
+          return res.status(500).json({
+            error: "Failed to upload profile picture.",
+            details: uploadError.message,
+          });
+        }
+
+        // 🌐 Get public URL of the uploaded image
+        const { data: publicData } = supabase.storage
+          .from("photo_app")
+          .getPublicUrl(filePath);
+
+        profilePicUrl = publicData.publicUrl;
+
+        // Add these to updates object
+        updates.profilePic = profilePicUrl;
+        updates.pfpPath = filePath;
+      }
+
+      // 3️⃣ Ensure at least one field is being updated
+      if (!file && Object.keys(updates).length === 0) {
+        return res.status(400).json({ error: "No fields provided to update." });
+      }
+
+      // 4️⃣ Update MongoDB user
+      const updatedUser = await User.findOneAndUpdate(
+        { userId: userID },
+        { $set: updates },
+        { new: true }
+      );
+
+      if (!updatedUser) {
+        return res.status(404).json({ error: "User not found during update." });
+      }
+
+      // 5️⃣ Respond to client
+      res.json({
+        message: file
+          ? "Profile picture updated successfully!"
+          : "User details updated successfully!",
+        user: updatedUser,
       });
-
-    if (uploadError) {
-      console.error("Upload error:", uploadError);
-      return res.status(500).json({ error: "Failed to upload file to storage." });
+    } catch (err) {
+      console.error("❌ Update failed:", err.message);
+      res.status(500).json({
+        error: "User update failed.",
+        details: err.message,
+      });
     }
-
-    // 2️⃣ Get public URL
-    const { data: publicData } = supabase.storage
-      .from("photo_app")
-      .getPublicUrl(filePath);
-    const publicUrl = publicData.publicUrl;
-
-    // 3️⃣ Insert or update SQL table
-    const { error: dbError } = await supabase
-      .from("user_pfp")
-      .upsert([{ user_id: userID, pfp_path: publicUrl }]); // stores the actual URL
-
-    if (dbError) {
-      console.error("DB error:", dbError);
-      return res.status(500).json({ error: "Failed to update pfp path in DB." });
-    }
-
-    res.json({
-      message: "Profile picture updated successfully!",
-      profilePicUrl: publicUrl,
-    });
-  } catch (err) {
-    console.error("Upload or DB update failed:", err.message);
-    res.status(500).json({ error: "Profile pic update failed." });
   }
+);
+
+
+
+
+
+
+// POST /api/add-user-data/:userID
+router.post("/api/add-user-data/:userID", verifyAPIKey, async (req, res) => {
+  const userID = req.params.userID;
+  const updates = req.body;
+
+  const {data: addData, error: addDataError} = await supabase.from('user_profile')
+                                                             .insert([{ user_id: userID, ...updates, }])
+
+
 });
+
 
 
 export default router;

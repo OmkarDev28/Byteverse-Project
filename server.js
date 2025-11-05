@@ -15,7 +15,7 @@ const app = express();
 app.use(express.json());
 
 connectDB();
-console.log('fs');
+
 
 
 app.use(

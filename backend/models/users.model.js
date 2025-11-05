@@ -17,8 +17,18 @@ const userSchema = new mongoose.Schema(
 
     name: {
       type: String,
-      required: true,
+      required: false,
       trim: true,
+    },
+
+    profilePic: {
+      type: String, 
+      default: "",
+    },
+
+    pfpPath: {
+      type: String,
+      default: "",
     },
 
     bio: {
@@ -29,14 +39,14 @@ const userSchema = new mongoose.Schema(
     
     issuesReported: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: "Issue",
       },
     ],
 
     issuesResolved: [
       {
-        type: mongoose.Schema.Types.ObjectId,
+        type: String,
         ref: "Issue",
       },
     ],
@@ -54,16 +64,12 @@ const userSchema = new mongoose.Schema(
     },
 
     
-    profilePic: {
-      type: String,
-      default: "",
-    },
-
+    
     
   },
   { timestamps: true }
 );
 
-const User = mongoose.model("User", userSchema, "user_data");
+const User = mongoose.model("user_data", userSchema, "user_data");
 
 export default User;

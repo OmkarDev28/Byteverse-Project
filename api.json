@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 {
   "POST /api/register": {
     "description": "Registers a new user",
@@ -184,3 +185,193 @@
     }
   }
 }
+=======
+https://byteverse-project-1.onrender.com
+{
+  "POST /api/register": {
+    "description": "Registers a new user",
+    "request": {
+      "body": {
+        "username": "string",
+        "password": "string"
+      }
+    },
+    "response": {
+      "status": 201,
+      "body": {
+        "message": "User registered",
+        "user": {
+          "id": "number",
+          "username": "string"
+        }
+      }
+    }
+  }
+}
+
+{
+  "POST /api/upload-post": {
+    "description": "Uploads a new post with an image and optional caption. Requires an API key.",
+    "middleware": ["verifyAPIKey", "multer (single file upload)"],
+    "request": {
+      "headers": {
+        "Content-Type": "multipart/form-data",
+        "x-api-key": "string (required)"
+      },
+      "body": {
+        "id": "string (User ID, required)",
+        "caption": "string (optional)",
+        "file": "file (required)"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "message": "File uploaded successfully.",
+        "path": "string (path in storage)",
+        "publicUrl": "string (public URL of uploaded image)"
+      },
+      "error": {
+        "400": {
+          "error": "No file uploaded or User ID missing."
+        },
+        "500": {
+          "error": "Failed to upload file or internal server error."
+        }
+      }
+    }
+  },
+
+  "PUT /api/edit-post/:postID": {
+    "description": "Edits the caption of an existing post. Only the owner of the post can edit it.",
+    "middleware": ["verifyAPIKey"],
+    "request": {
+      "headers": {
+        "Content-Type": "application/json",
+        "x-api-key": "string (required)"
+      },
+      "params": {
+        "postID": "string (required)"
+      },
+      "body": {
+        "id": "string (User ID, required)",
+        "updatedPostCaption": "string (new caption, required)"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "message": "Post updated successfully.",
+        "updatedPost": "object (updated post data)"
+      },
+      "error": {
+        "400": {
+          "message": "You can edit only your posts."
+        },
+        "500": {
+          "message": "Internal server error."
+        }
+      }
+    }
+  }
+}
+
+{
+  "POST /api/add-comment/:postId": {
+    "description": "Adds a comment to a specific post. Requires API key authentication.",
+    "middleware": ["verifyAPIKey"],
+    "request": {
+      "headers": {
+        "Content-Type": "application/json",
+        "x-api-key": "string (required)"
+      },
+      "params": {
+        "postId": "string (required)"
+      },
+      "body": {
+        "id": "string (User ID, required)",
+        "commentText": "string (Comment content, required)"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "message": "Comment added"
+      },
+      "error": {
+        "400": {
+          "message": "Post ID or comment text is required."
+        },
+        "500": {
+          "message": "Error while posting comment or internal server error."
+        }
+      }
+    }
+  },
+
+  "DELETE /api/delete-comment/:commentID": {
+    "description": "Deletes a comment by its ID. Requires API key authentication.",
+    "middleware": ["verifyAPIKey"],
+    "request": {
+      "headers": {
+        "Content-Type": "application/json",
+        "x-api-key": "string (required)"
+      },
+      "params": {
+        "commentID": "string (required)"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "message": "Comment deleted successfully."
+      },
+      "error": {
+        "400": {
+          "message": "Comment ID is required to delete comment."
+        },
+        "500": {
+          "error": "Failed to delete comment or internal server error."
+        }
+      }
+    }
+  },
+
+  "PUT /api/edit-comment/:commentID": {
+    "description": "Edits an existing comment. Only the owner of the comment can edit it.",
+    "middleware": ["verifyAPIKey"],
+    "request": {
+      "headers": {
+        "Content-Type": "application/json",
+        "x-api-key": "string (required)"
+      },
+      "params": {
+        "commentID": "string (required)"
+      },
+      "body": {
+        "id": "string (User ID, required)",
+        "updatedCommentText": "string (New comment text, required)"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "message": "Comment updated successfully.",
+        "updated": "object (updated comment details)"
+      },
+      "error": {
+        "400": {
+          "message": "Comment ID is required."
+        },
+        "404": {
+          "message": "Comment not found or not yours."
+        },
+        "500": {
+          "message": "Error while editing comment or internal server error."
+        }
+      }
+    }
+  }
+}
+
+>>>>>>> cd89563920f2d6c37a62a2e6764d9f55de7c4937
