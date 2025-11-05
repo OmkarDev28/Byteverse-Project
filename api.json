@@ -1,4 +1,38 @@
-<<<<<<< HEAD
+{
+  "/api/user/:userID": {
+    "description": "Retrieves user details from MongoDB using the provided user ID. Requires an API key.",
+    "middleware": ["verifyAPIKey"],
+    "request": {
+      "headers": {
+        "x-api-key": "string (required)"
+      },
+      "params": {
+        "userID": "string (required)"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "getUser": [
+          {
+            "userId": "string",
+            "username": "string",
+            "name": "string (optional)",
+            "bio": "string (optional)",
+            "profilePic": "string (public URL, optional)",
+            "pfpPath": "string (storage path, optional)"
+          }
+        ]
+      }
+    },
+    "errors": {
+      "403": { "message": "User Id is required." },
+      "404": { "message": "User not found." },
+      "500": { "message": "Internal server error." }
+    }
+  }
+}
+
 {
   "POST /api/register": {
     "description": "Registers a new user",
@@ -185,193 +219,54 @@
     }
   }
 }
-=======
-https://byteverse-project-1.onrender.com
+
 {
-  "POST /api/register": {
-    "description": "Registers a new user",
+  "PATCH /api/update-user/:userID": {
+    "description": "Updates user details or uploads a new profile picture. If a new profile picture is uploaded, the previous one is removed from Supabase Storage.",
+    "auth": {
+      "type": "API Key",
+      "header": "x-api-key",
+      "required": true
+    },
+    "params": {
+      "userID": "string (required)"
+    },
     "request": {
+      "contentType": "multipart/form-data",
       "body": {
-        "username": "string",
-        "password": "string"
+        "file": "binary (optional, new profile picture)",
+        "username": "string (optional)",
+        "name": "string (optional)",
+        "bio": "string (optional)",
+        "settings": {
+          "theme": "string (optional)",
+          "notifications": "boolean (optional)"
+        }
       }
     },
     "response": {
-      "status": 201,
+      "status": 200,
       "body": {
-        "message": "User registered",
+        "message": "Profile picture updated successfully!",
         "user": {
-          "id": "number",
-          "username": "string"
+          "userId": "string",
+          "username": "string",
+          "name": "string",
+          "bio": "string",
+          "profilePic": "string (public URL from Supabase)",
+          "pfpPath": "string (internal storage path)",
+          "settings": {
+            "theme": "string",
+            "notifications": "boolean"
+          }
         }
       }
+    },
+    "errors": {
+      "400": { "error": "No fields provided to update." },
+      "404": { "error": "User not found." },
+      "500": { "error": "User update failed." }
     }
   }
 }
 
-{
-  "POST /api/upload-post": {
-    "description": "Uploads a new post with an image and optional caption. Requires an API key.",
-    "middleware": ["verifyAPIKey", "multer (single file upload)"],
-    "request": {
-      "headers": {
-        "Content-Type": "multipart/form-data",
-        "x-api-key": "string (required)"
-      },
-      "body": {
-        "id": "string (User ID, required)",
-        "caption": "string (optional)",
-        "file": "file (required)"
-      }
-    },
-    "response": {
-      "status": 200,
-      "body": {
-        "message": "File uploaded successfully.",
-        "path": "string (path in storage)",
-        "publicUrl": "string (public URL of uploaded image)"
-      },
-      "error": {
-        "400": {
-          "error": "No file uploaded or User ID missing."
-        },
-        "500": {
-          "error": "Failed to upload file or internal server error."
-        }
-      }
-    }
-  },
-
-  "PUT /api/edit-post/:postID": {
-    "description": "Edits the caption of an existing post. Only the owner of the post can edit it.",
-    "middleware": ["verifyAPIKey"],
-    "request": {
-      "headers": {
-        "Content-Type": "application/json",
-        "x-api-key": "string (required)"
-      },
-      "params": {
-        "postID": "string (required)"
-      },
-      "body": {
-        "id": "string (User ID, required)",
-        "updatedPostCaption": "string (new caption, required)"
-      }
-    },
-    "response": {
-      "status": 200,
-      "body": {
-        "message": "Post updated successfully.",
-        "updatedPost": "object (updated post data)"
-      },
-      "error": {
-        "400": {
-          "message": "You can edit only your posts."
-        },
-        "500": {
-          "message": "Internal server error."
-        }
-      }
-    }
-  }
-}
-
-{
-  "POST /api/add-comment/:postId": {
-    "description": "Adds a comment to a specific post. Requires API key authentication.",
-    "middleware": ["verifyAPIKey"],
-    "request": {
-      "headers": {
-        "Content-Type": "application/json",
-        "x-api-key": "string (required)"
-      },
-      "params": {
-        "postId": "string (required)"
-      },
-      "body": {
-        "id": "string (User ID, required)",
-        "commentText": "string (Comment content, required)"
-      }
-    },
-    "response": {
-      "status": 200,
-      "body": {
-        "message": "Comment added"
-      },
-      "error": {
-        "400": {
-          "message": "Post ID or comment text is required."
-        },
-        "500": {
-          "message": "Error while posting comment or internal server error."
-        }
-      }
-    }
-  },
-
-  "DELETE /api/delete-comment/:commentID": {
-    "description": "Deletes a comment by its ID. Requires API key authentication.",
-    "middleware": ["verifyAPIKey"],
-    "request": {
-      "headers": {
-        "Content-Type": "application/json",
-        "x-api-key": "string (required)"
-      },
-      "params": {
-        "commentID": "string (required)"
-      }
-    },
-    "response": {
-      "status": 200,
-      "body": {
-        "message": "Comment deleted successfully."
-      },
-      "error": {
-        "400": {
-          "message": "Comment ID is required to delete comment."
-        },
-        "500": {
-          "error": "Failed to delete comment or internal server error."
-        }
-      }
-    }
-  },
-
-  "PUT /api/edit-comment/:commentID": {
-    "description": "Edits an existing comment. Only the owner of the comment can edit it.",
-    "middleware": ["verifyAPIKey"],
-    "request": {
-      "headers": {
-        "Content-Type": "application/json",
-        "x-api-key": "string (required)"
-      },
-      "params": {
-        "commentID": "string (required)"
-      },
-      "body": {
-        "id": "string (User ID, required)",
-        "updatedCommentText": "string (New comment text, required)"
-      }
-    },
-    "response": {
-      "status": 200,
-      "body": {
-        "message": "Comment updated successfully.",
-        "updated": "object (updated comment details)"
-      },
-      "error": {
-        "400": {
-          "message": "Comment ID is required."
-        },
-        "404": {
-          "message": "Comment not found or not yours."
-        },
-        "500": {
-          "message": "Error while editing comment or internal server error."
-        }
-      }
-    }
-  }
-}
-
->>>>>>> cd89563920f2d6c37a62a2e6764d9f55de7c4937

@@ -11,47 +11,69 @@ const upload = multer({ storage });
 router.post("/api/upload-post", verifyAPIKey, upload.single("file"), async (req, res) => {
   try {
     const file = req.file;
-    const userId = req.body.id; 
+    const userId = req.body.id;
     const postCaption = req.body.caption;
 
-    if (!file) return res.status(400).json({ error: "No file uploaded." });
-    if (!userId) return res.status(400).json({ error: "User ID is required." });
+    // caption must be present
+    if (!postCaption || postCaption.trim() === "")
+      return res.status(400).json({ error: "Caption is required." });
 
-    
-    const ext = file.originalname.split(".").pop();
-    const randomHex = crypto.randomBytes(16).toString("hex");
-    const filename = `${randomHex}.${ext}`;
+    if (!userId)
+      return res.status(400).json({ error: "User ID is required." });
 
-    
-    const filePath = `user_posts/${userId}/${filename}`;
+    let filePath = null;
+    let publicUrl = null;
 
-    
-    const { data, error } = await supabase.storage
-      .from("photo_app")
-      .upload(filePath, file.buffer, {
-        contentType: file.mimetype,
-        upsert: false,
-      });
+    // If file exists, upload it
+    if (file) {
+      const ext = file.originalname.split(".").pop();
+      const randomHex = crypto.randomBytes(16).toString("hex");
+      const filename = `${randomHex}.${ext}`;
+      filePath = `user_posts/${userId}/${filename}`;
 
-    if (error) {
-      console.error("Upload error:", error);
-      return res.status(500).json({ error: "Failed to upload file." });
+      const { data, error } = await supabase.storage
+        .from("photo_app")
+        .upload(filePath, file.buffer, {
+          contentType: file.mimetype,
+          upsert: false,
+        });
+
+      if (error) {
+        console.error("Upload error:", error);
+        return res.status(500).json({ error: "Failed to upload file." });
+      }
+
+      // ✅ fix: match the same bucket name here ("photo_app")
+      const { data: publicUrlData } = supabase.storage
+        .from("photo_app")
+        .getPublicUrl(filePath);
+
+      publicUrl = publicUrlData.publicUrl;
     }
 
-    
-    const { data: publicUrlData } = supabase.storage
-      .from("photo-app")
-      .getPublicUrl(filePath);
+    // Insert post record (works for both text-only and photo posts)
+    const { error: insertError } = await supabase
+      .from("posts")
+      .insert([
+        {
+          user_id: userId,
+          caption: postCaption,
+          post_path: filePath,
+          postPhotoUrl: publicUrl,
+        },
+      ]);
 
-    const { data: insertPost} = await supabase
-                                    .from('posts')
-                                    .insert([{ post_path: filePath, user_id: userId, caption: postCaption}])
-
+    if (insertError) {
+      console.error("Database insert error:", insertError);
+      return res.status(500).json({ error: "Failed to save post record." });
+    }
 
     res.json({
-      message: "File uploaded successfully.",
-      path: filePath,
-      publicUrl: publicUrlData.publicUrl,
+      message: "Post uploaded successfully.",
+      photoIncluded: !!file,
+      caption: postCaption,
+      filePath,
+      publicUrl,
     });
   } catch (err) {
     console.error("Server error:", err);
@@ -59,9 +81,12 @@ router.post("/api/upload-post", verifyAPIKey, upload.single("file"), async (req,
   }
 });
 
+
 router.put("/api/edit-post/:postID", verifyAPIKey, async (req, res) => {
   const postId = req.params.postID;
   const { id: userID, updatedPostCaption } = req.body;
+
+  
 
   try {
     const { data: post, error: fetchError } = await supabase
@@ -70,8 +95,11 @@ router.put("/api/edit-post/:postID", verifyAPIKey, async (req, res) => {
       .eq("post_id", postId)
       .single();
 
+      console.log("userId from request:", typeof(req.body.id));
+ console.log("post owner in db:", typeof(post.user_id));
+
     if (fetchError) throw fetchError;
-    if (!post || post.user_id !== userID) {
+    if (!post || post.user_id !== Number(userID)) {
       return res.status(403).json({ message: "You can edit only your posts." });
     }
 

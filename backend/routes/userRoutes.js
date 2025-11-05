@@ -12,6 +12,27 @@ const router = express.Router();
 const storage = multer.memoryStorage();
 const upload = multer({ storage });
 
+
+router.get("/api/user/:userID", verifyAPIKey, async (req, res) => {
+  const userID = req.params.userID;
+
+  try {
+    if (!userID) { res.status(403).json({ message: "User Id is required."});}
+
+    const getUser = await User.find(
+      { userId: userID }
+    )
+
+    if(!getUser) { res.status(404).json({ message: "User not found."});}
+
+    res.json({
+      getUser
+    });
+  } catch (err) {
+    console.error("Server error:", err);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
 // ---------------- Get Followers ----------------
 router.get("/api/getfollowers/:id", authenticateToken, async (req, res) => {
   const userId = parseInt(req.params.id);
@@ -269,22 +290,6 @@ router.patch(
     }
   }
 );
-
-
-
-
-
-
-// POST /api/add-user-data/:userID
-router.post("/api/add-user-data/:userID", verifyAPIKey, async (req, res) => {
-  const userID = req.params.userID;
-  const updates = req.body;
-
-  const {data: addData, error: addDataError} = await supabase.from('user_profile')
-                                                             .insert([{ user_id: userID, ...updates, }])
-
-
-});
 
 
 
