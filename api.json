@@ -23,7 +23,7 @@ https://byteverse-project-1.onrender.com
 
 {
   "POST /api/upload-post": {
-    "description": "Uploads a new post with an image and optional caption. Requires an API key.",
+    "description": "Creates a new post. Caption is mandatory, image is optional. If an image is uploaded, it will be stored in Supabase Storage. Requires an API key.",
     "middleware": ["verifyAPIKey", "multer (single file upload)"],
     "request": {
       "headers": {
@@ -32,27 +32,40 @@ https://byteverse-project-1.onrender.com
       },
       "body": {
         "id": "string (User ID, required)",
-        "caption": "string (optional)",
-        "file": "file (required)"
+        "caption": "string (required, cannot be empty)",
+        "file": "file (optional, image to upload)"
       }
     },
     "response": {
       "status": 200,
       "body": {
-        "message": "File uploaded successfully.",
-        "path": "string (path in storage)",
-        "publicUrl": "string (public URL of uploaded image)"
+        "message": "Post uploaded successfully.",
+        "photoIncluded": "boolean (true if file uploaded, false otherwise)",
+        "caption": "string",
+        "filePath": "string | null (path in Supabase Storage)",
+        "publicUrl": "string | null (public URL of image if uploaded)"
+      }
+    },
+    "errors": {
+      "400": {
+        "error": "Caption is required."
       },
-      "error": {
-        "400": {
-          "error": "No file uploaded or User ID missing."
-        },
-        "500": {
-          "error": "Failed to upload file or internal server error."
-        }
+      "400_user": {
+        "error": "User ID is required."
+      },
+      "500_upload": {
+        "error": "Failed to upload file."
+      },
+      "500_insert": {
+        "error": "Failed to save post record."
+      },
+      "500_server": {
+        "error": "Internal server error."
       }
     }
-  },
+  }
+}
+
 
   "PUT /api/edit-post/:postID": {
     "description": "Edits the caption of an existing post. Only the owner of the post can edit it.",
