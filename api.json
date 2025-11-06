@@ -377,4 +377,80 @@ https://byteverse-project-1.onrender.com
   }
 }
 
+{
+  "POST /api/like-unlike": {
+    "description": "Toggles a like/unlike on a post by the logged-in user. If the user has already liked the post, it will remove the like; otherwise, it will create a like.",
+    "auth": {
+      "type": "API Key",
+      "header": "x-api-key",
+      "required": true
+    },
+    "request": {
+      "contentType": "application/json",
+      "body": {
+        "id": "string (User ID, required)",
+        "post_id": "string (Post ID, required)"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "message": "Post liked/unliked successfully",
+        "action": "string ('liked' or 'unliked')"
+      }
+    },
+    "errors": {
+      "400": {
+        "message": "User ID or post ID is missing."
+      },
+      "404": {
+        "message": "Like/unlike operation failed."
+      },
+      "500": {
+        "message": "Internal server error."
+      }
+    }
+  }
+}
+
+{
+  "GET /api/posts/recent": {
+    "description": "Fetches recent posts from Supabase and appends likes count from Neo4j. Supports pagination via `limit` and `offset`. Requires API key.",
+    "middleware": ["verifyAPIKey"],
+    "request": {
+      "headers": {
+        "x-api-key": "string (required)"
+      },
+      "query": {
+        "limit": "number (optional, default 5) - Number of posts to fetch",
+        "offset": "number (optional, default 0) - Offset for pagination"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "message": "Recent posts fetched successfully.",
+        "posts": [
+          {
+            "post_id": "string",
+            "user_id": "string",
+            "caption": "string",
+            "post_path": "string | null",
+            "postPhotoUrl": "string | null",
+            "created_at": "string (timestamp)",
+            "likesCount": "number"
+          }
+        ],
+        "limit": "number",
+        "offset": "number",
+        "nextOffset": "number (offset to use for next page)"
+      }
+    },
+    "errors": {
+      "500": { "message": "Internal server error." }
+    }
+  }
+}
+
+
 >>>>>>> cd89563920f2d6c37a62a2e6764d9f55de7c4937

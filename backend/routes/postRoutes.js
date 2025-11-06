@@ -3,6 +3,7 @@ import multer from "multer";
 import crypto from "crypto";
 import supabase from "../config/supabaseClient.js";
 import verifyAPIKey from "../middleware/verifyAPIKey.js";
+import driver from "../config/neo4jClient.js";
 
 const router = express.Router();
 const storage = multer.memoryStorage();
@@ -112,6 +113,105 @@ router.put("/api/edit-post/:postID", verifyAPIKey, async (req, res) => {
     if (updateError) throw updateError;
 
     res.json({ message: "Post updated successfully", updatedPost });
+  } catch (err) {
+    console.error("Server error:", err);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+router.post("/api/like-unlike", verifyAPIKey, async (req, res) => {
+  const userID = req.body.id;
+  const postID = req.body.post_id;
+
+  if (!userID || !postID){
+    return res.status(400).json({ message: "User ID or post ID is missing."});
+  }
+
+  const session = driver.session();
+
+  try {
+    const result = await session.run(
+      `
+      MERGE (u:User {id: $userID})
+      MERGE (p:Post {post_id: $postID})
+      WITH u, p
+      OPTIONAL MATCH (u)-[r:LIKES]-(p)
+      WITH u, p, r
+      CALL apoc.do.when(
+        r is NULL,
+        'CREATE (u)-[:LIKES]->(p) RETURN "liked" AS action',
+        'DELETE r RETURN "unliked" AS action',
+        {u:u, p:p, r:r}
+      )YIELD value
+      RETURN value.action as action
+      `,
+      { userID, postID}
+    );
+
+    const records = result.records;
+
+    if (!records || records.length === 0) {
+      return res.status(404).json({ error: "Like/unlike operation failed." });
+    }
+
+    const action = result.records[0].get("action");
+    res.json({ message:  `Post ${action}`})
+  } catch (err) {
+    console.error("Server error:", err);
+    res.status(500).json({ message: "Internal server error." });
+  }
+});
+
+
+// GET /api/posts/recent?limit=5&offset=0
+router.get("/api/posts/recent", verifyAPIKey, async (req, res) => {
+  try {
+    let limit = parseInt(req.query.limit) || 5;
+    let offset = parseInt(req.query.offset) || 0;
+
+    // 1️⃣ Fetch posts from Supabase
+    const { data: posts, error } = await supabase
+      .from("posts")
+      .select("post_id, user_id, caption, post_path, postPhotoUrl, created_at")
+      .order("created_at", { ascending: false })
+      .range(offset, offset + limit - 1);
+
+    if (error) {
+      console.error("Supabase fetch error:", error);
+      return res.status(500).json({ message: "Failed to fetch posts." });
+    }
+
+    const session = driver.session();
+    const postIDs = posts.map(p => String(p.post_id));
+    const result = await session.run(
+      `
+      UNWIND $postIDs AS pid
+      MATCH (p:Post {post_id: pid})
+      OPTIONAL MATCH (u:User)-[:LIKES]->(p)
+      RETURN p.post_id AS post_id, COUNT(u) AS likesCount
+      `,
+      { postIDs }
+    );
+
+    const likesMap = {};
+    result.records.forEach(rec => {
+      likesMap[rec.get("post_id")] = rec.get("likesCount").toNumber();
+    });
+
+    const postsWithLikes = posts.map(p => ({
+      ...p,
+      likesCount: likesMap[String(p.post_id)] || 0
+    }));
+    await session.close();
+
+    res.json({
+      message: "Recent posts fetched successfully.",
+      posts: postsWithLikes,
+      limit,
+      offset,
+      nextOffset: offset + postsWithLikes.length
+    });
+
   } catch (err) {
     console.error("Server error:", err);
     res.status(500).json({ message: "Internal server error." });

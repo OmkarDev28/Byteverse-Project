@@ -5,6 +5,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import supabase from "../config/supabaseClient.js";
 import User from "../models/users.model.js";
+import driver from "../config/neo4jClient.js";
 
 const router = express.Router();
 const JWT_SECRET = process.env.JWT_SECRET || "supersecret";
@@ -97,23 +98,6 @@ router.post("/api/register", async (req, res) => {
   }
 });
 
-
-router.post("/api/login", (req, res, next) => {
-  passport.authenticate("local", { session: true }, (err, user, info) => {
-    if (err) return next(err);
-    if (!user)
-      return res.status(401).json({ message: info?.message || "Login failed" });
-
-    req.logIn(user, (err) => {
-      if (err) return next(err);
-
-      const token = jwt.sign(user, JWT_SECRET, { expiresIn: "1h" });
-      const refreshToken = jwt.sign(user, JWT_SECRET, { expiresIn: "7d" });
-
-      res.json({ message: "Login successful", user, token, refreshToken });
-    });
-  })(req, res, next);
-});
 
 
 router.post("/api/token", (req, res) => {
