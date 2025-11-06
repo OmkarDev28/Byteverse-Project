@@ -6,6 +6,7 @@ import User from "../models/users.model.js";
 import multer from "multer";
 import mongoose from "mongoose";
 import supabase from "../config/supabaseClient.js";
+import driver from "../config/neo4jClient.js";
 
 const router = express.Router();
 
@@ -290,6 +291,80 @@ router.patch(
     }
   }
 );
+
+router.post("/api/follow", verifyAPIKey, async (req, res) => {
+  try {
+    let { followerId, followingId } = req.body;
+
+    if (!followerId || !followingId) {
+      return res.status(400).json({ error: "Both followerId and followingId are required." });
+    }
+
+    followerId = String(followerId);
+    followingId = String(followingId);
+
+    if (followerId === followingId) {
+      return res.status(400).json({ error: "You cannot follow yourself." });
+    }
+
+    const session = driver.session();
+
+    const result = await session.run(
+      `
+        MERGE (a:User {id: $followerId})
+        MERGE (b:User {id: $followingId})
+        MERGE (a)-[:FOLLOWS]->(b)
+        RETURN a, b
+      `,
+      { followerId, followingId }
+    );
+
+    await session.close();
+
+    return res.json({ message: `User ${followerId} now follows ${followingId}.` });
+
+  } catch (error) {
+    console.error("Neo4j follow error:", error);
+    res.status(500).json({ error: "Internal server error." });
+  }
+});
+
+router.delete("/api/unfollow", verifyAPIKey, async (req, res) => {
+  const { followerId, followingId } = req.body;
+
+  if (!followerId || !followingId) {
+    return res.status(400).json({ error: "Missing followerId or followingId" });
+  }
+
+  
+
+  const session = driver.session();
+
+  try {
+    const result = await session.run(
+      `
+        MATCH (a:User {id: $followerId})-[r:FOLLOWS]->(b:User {id: $followingId})
+        DELETE r
+        RETURN COUNT(r) AS deletedCount
+      `,
+      { followerId, followingId }
+    );
+
+    const deletedCount = result.records[0].get("deletedCount").toNumber();
+
+    if (deletedCount === 0) {
+      return res.status(404).json({ message: "No follow relationship found." });
+    }
+
+    res.json({ message: "Unfollowed successfully." });
+  } catch (error) {
+    console.error("Neo4j error:", error);
+    res.status(500).json({ error: "Internal server error" });
+  } finally {
+    await session.close();
+  }
+});
+
 
 
 

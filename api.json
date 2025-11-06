@@ -312,4 +312,69 @@ https://byteverse-project-1.onrender.com
   }
 }
 
+{
+  "POST /api/follow": {
+    "description": "Creates a follow relationship from one user to another in the Neo4j graph. Users cannot follow themselves.",
+    "auth": {
+      "type": "API Key",
+      "header": "x-api-key",
+      "required": true
+    },
+    "request": {
+      "contentType": "application/json",
+      "body": {
+        "followerId": "string (ID of the user who wants to follow, required)",
+        "followingId": "string (ID of the user to be followed, required)"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "message": "User <followerId> now follows <followingId>."
+      }
+    },
+    "errors": {
+      "400": {
+        "error": "Both followerId and followingId are required or cannot follow self."
+      },
+      "500": {
+        "error": "Internal server error."
+      }
+    }
+  },
+
+  "DELETE /api/unfollow": {
+    "description": "Deletes an existing follow relationship from one user to another in Neo4j.",
+    "auth": {
+      "type": "API Key",
+      "header": "x-api-key",
+      "required": true
+    },
+    "request": {
+      "contentType": "application/json",
+      "body": {
+        "followerId": "string (ID of the user who wants to unfollow, required)",
+        "followingId": "string (ID of the user to unfollow, required)"
+      }
+    },
+    "response": {
+      "status": 200,
+      "body": {
+        "message": "Unfollowed successfully."
+      },
+      "404": {
+        "message": "No follow relationship found."
+      }
+    },
+    "errors": {
+      "400": {
+        "error": "Missing followerId or followingId."
+      },
+      "500": {
+        "error": "Internal server error."
+      }
+    }
+  }
+}
+
 >>>>>>> cd89563920f2d6c37a62a2e6764d9f55de7c4937
