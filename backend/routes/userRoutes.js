@@ -34,103 +34,164 @@ router.get("/api/user/:userID", verifyAPIKey, async (req, res) => {
     res.status(500).json({ message: "Internal server error." });
   }
 });
+
 // ---------------- Get Followers ----------------
-router.get("/api/getfollowers/:id", authenticateToken, async (req, res) => {
-  const userId = parseInt(req.params.id);
+router.get("/api/getfollowers/:id", verifyAPIKey, async (req, res) => {
+  const userID = Number(req.params.id);
+
+  if (!userID) { return res.status(400).json({ message: "No user ID."});}
+
+    try {
+      const {data, error} = await supabase
+        .from('followers')
+        .select(
+          `
+          follower_id,
+          users: follower_id (
+            username
+          )
+          `
+        )
+        .eq('following_id', userID)
+    
+        if (error) throw error;
+
+        const followers = data.map(f => ({
+          id: f.follower_id,
+          username: f.users.username
+        }));
+
+        return res.status(200).json({followers});
+    } catch (err) {
+        console.error("Server error:", err);
+        res.status(500).json({ message: "Internal server error." });
+    }
+});
+
+router.post("/api/like-unlike", verifyAPIKey, async (req, res) => {
+  const userID = Number(req.body.id);
+  const postID = Number(req.body.post_id);
+
+  console.log("Incoming like request:", { userID, postID });
+
+
+  if (!userID || !postID){
+    return res.status(400).json({ message: "User ID or post ID is missing."});
+  }
+
+  
 
   try {
-    const followersRes = await pool.query(
-      `SELECT u.id, u.username, f.created_at AS followed_at
-       FROM follows f
-       JOIN users u ON f.follower_id = u.id
-       WHERE f.following_id = $1
-       ORDER BY f.created_at DESC`,
-      [userId]
-    );
+    const {data: existing, error: fetchError} =await supabase.from('likes').select('*').eq('user_id', userID).eq('post_id', postID).maybeSingle()
 
-    res.json({ followers: followersRes.rows });
+    if (fetchError) throw fetchError;
+
+    if (existing){
+      const {data: deleteLike, error: deleteLikeError} = await supabase.from('likes')
+                                                                       .delete()
+                                                                       .eq('user_id', userID)
+                                                                       .eq('post_id', postID)
+                                                                       
+
+      
+      if (deleteLikeError) throw deleteLikeError;
+      return res.status(200).json({ message: "Post unliked successfully." });
+    }
+    else {
+      const {data: addLike, error: addLikeError} = await supabase.from('likes').insert([{
+                                                                                user_id: userID,
+                                                                                post_id: postID
+                                                                            }])
+      
+      if (addLikeError) throw addLikeError;                                                                      
+      return res.status(200).json({message: "Post liked successfully."});
+    }
+
+    
+
   } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
+    console.error("Server error:", err);
+    res.status(500).json({ message: "Internal server error." });
   }
 });
+
+
+
 
 // ---------------- Get Following ----------------
-router.get("/api/getfollowing/:id", authenticateToken, async (req, res) => {
-  const userId = parseInt(req.params.id);
+router.get("/api/getfollowing/:id", verifyAPIKey, async (req, res) => {
+  const userID = Number(req.params.id);
 
   try {
-    const followingRes = await pool.query(
-      `SELECT u.id, u.username, f.created_at AS followed_at
-       FROM follows f
-       JOIN users u ON f.following_id = u.id
-       WHERE f.follower_id = $1
-       ORDER BY f.created_at DESC`,
-      [userId]
-    );
+    const {data, error} = await supabase
+      .from('followers')
+      .select(`
+        following_id,
+        users: following_id (
+          username
 
-    res.json({ following: followingRes.rows });
+        )
+        `)
+      .eq('follower_id', userID)
+
+      if (error) throw error;
+
+      const following = data.map(f => ({
+        id: f.following_id,
+        username: f.users.username
+      }));
+
+      return res.status(200).json({ followers });
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-router.post("/api/follow/:id", authenticateToken, async (req, res) => {
-  const followerId = req.user.id;         // logged-in user
-  const followingId = parseInt(req.params.id);
+router.post("/api/follow-unfollow/:user_id", verifyAPIKey, async (req, res) => {
+  const followerId = Number(req.body.id);         
+  const followingId = Number(req.params.user_id);
+
+  
+  
 
   if (followerId === followingId) {
     return res.status(400).json({ message: "You cannot follow yourself" });
   }
 
   try {
-    // Check if already following
-    const exists = await pool.query(
-      "SELECT 1 FROM follows WHERE follower_id = $1 AND following_id = $2",
-      [followerId, followingId]
-    );
-    if (exists.rows.length > 0) {
-      return res.status(400).json({ message: "Already following this user" });
+    const {data: existingFollower, error: existingFollowerError} = await supabase.from('followers')
+                                                                                 .select("*")
+                                                                                 .eq('follower_id', followerId)
+                                                                                 .eq('following_id', followingId)
+                                                                                 .maybeSingle()
+
+    if (existingFollowerError) throw existingFollowerError;
+    
+    if (existingFollower){ 
+      const {data: removeFollower, error: removeFollowerError} = await supabase.from('followers')
+                                                                               .delete()
+                                                                               .eq('follower_id', followerId)
+                                                                               .eq('following_id', followingId)
+
+      if (existingFollowerError) throw existingFollowerError;
+      return res.status(200).json({ message: "Unfollowed successfully."});                                                                        
     }
+    else {
+      const {data: addFollower, error: addFollowerError} = await supabase.from('followers')
+                                                                         .insert([{'follower_id': followerId, 'following_id': followingId}])
 
-    await pool.query(
-      "INSERT INTO follows (follower_id, following_id) VALUES ($1, $2)",
-      [followerId, followingId]
-    );
-
-    res.json({ message: "Followed successfully" });
+      if (addFollowerError) throw addFollowerError;
+      return res.status(200).json({ message: "Followed successfully."});                                                                      
+    }
+    
   } catch (err) {
     console.error(err);
     res.status(500).json({ message: "Server error" });
   }
 });
 
-// ---------------- Unfollow a user ----------------
-router.post("/api/unfollow/:id", authenticateToken, async (req, res) => {
-  const followerId = req.user.id;
-  const followingId = parseInt(req.params.id);
 
-  if (followerId === followingId) {
-    return res.status(400).json({ message: "You cannot unfollow yourself" });
-  }
-
-  try {
-    const result = await pool.query(
-      "DELETE FROM follows WHERE follower_id = $1 AND following_id = $2",
-      [followerId, followingId]
-    );
-
-    if (result.rowCount === 0) {
-      return res.status(400).json({ message: "You are not following this user" });
-    }
-
-    res.json({ message: "Unfollowed successfully" });
-  } catch (err) {
-    console.error(err);
-    res.status(500).json({ message: "Server error" });
-  }
-});
 
 router.post("/api/upload-pfp/:userID", verifyAPIKey, upload.single("file"), async (req, res) => {
   const userID = req.params.userID;
@@ -215,7 +276,7 @@ router.patch(
 
       // 2️⃣ Handle profile picture if uploaded
       if (file) {
-        // 🧹 Remove previous file if exists
+        // 🧹 Remove previous file from Supabase (if exists)
         if (user.pfpPath) {
           const { error: removeError } = await supabase.storage
             .from("photo_app")
@@ -247,24 +308,23 @@ router.patch(
           });
         }
 
-        // 🌐 Get public URL of the uploaded image
+        // 🌐 Get public URL
         const { data: publicData } = supabase.storage
           .from("photo_app")
           .getPublicUrl(filePath);
 
         profilePicUrl = publicData.publicUrl;
 
-        // Add these to updates object
         updates.profilePic = profilePicUrl;
         updates.pfpPath = filePath;
       }
 
-      // 3️⃣ Ensure at least one field is being updated
+      // 3️⃣ Check if anything to update
       if (!file && Object.keys(updates).length === 0) {
         return res.status(400).json({ error: "No fields provided to update." });
       }
 
-      // 4️⃣ Update MongoDB user
+      // 4️⃣ Update MongoDB
       const updatedUser = await User.findOneAndUpdate(
         { userId: userID },
         { $set: updates },
@@ -275,7 +335,19 @@ router.patch(
         return res.status(404).json({ error: "User not found during update." });
       }
 
-      // 5️⃣ Respond to client
+      try {
+        const {date, error} = await supabase
+          .from('users')
+          .update([{pfpPath: updates.pfpPath, ProfilePic: updates.profilePic}])
+          .eq('id', userID)
+
+        if ( error ) throw error;
+      
+      } catch (neoErr) {
+        console.error("⚠️ Failed to update Neo4j:", neoErr.message);
+      }
+
+      // 6️⃣ Final response
       res.json({
         message: file
           ? "Profile picture updated successfully!"

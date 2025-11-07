@@ -119,48 +119,7 @@ router.put("/api/edit-post/:postID", verifyAPIKey, async (req, res) => {
   }
 });
 
-router.post("/api/like-unlike", verifyAPIKey, async (req, res) => {
-  const userID = req.body.id;
-  const postID = req.body.post_id;
 
-  if (!userID || !postID){
-    return res.status(400).json({ message: "User ID or post ID is missing."});
-  }
-
-  const session = driver.session();
-
-  try {
-    const result = await session.run(
-      `
-      MERGE (u:User {id: $userID})
-      MERGE (p:Post {post_id: $postID})
-      WITH u, p
-      OPTIONAL MATCH (u)-[r:LIKES]-(p)
-      WITH u, p, r
-      CALL apoc.do.when(
-        r is NULL,
-        'CREATE (u)-[:LIKES]->(p) RETURN "liked" AS action',
-        'DELETE r RETURN "unliked" AS action',
-        {u:u, p:p, r:r}
-      )YIELD value
-      RETURN value.action as action
-      `,
-      { userID, postID}
-    );
-
-    const records = result.records;
-
-    if (!records || records.length === 0) {
-      return res.status(404).json({ error: "Like/unlike operation failed." });
-    }
-
-    const action = result.records[0].get("action");
-    res.json({ message:  `Post ${action}`})
-  } catch (err) {
-    console.error("Server error:", err);
-    res.status(500).json({ message: "Internal server error." });
-  }
-});
 
 
 // GET /api/posts/recent?limit=5&offset=0

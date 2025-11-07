@@ -57,6 +57,8 @@ passport.deserializeUser(async (id, done) => {
 
 
 router.post("/api/register", async (req, res) => {
+  const session = driver.session();
+
   try {
     const { username, password } = req.body;
 
@@ -72,12 +74,12 @@ router.post("/api/register", async (req, res) => {
     if (existing && existing.length > 0)
       return res.status(400).json({ message: "Username already exists (Supabase)" });
 
-    // 2️⃣ Check in MongoDB as well
+    // 2️⃣ Check in MongoDB
     const mongoExisting = await User.findOne({ username });
     if (mongoExisting)
       return res.status(400).json({ message: "Username already exists (MongoDB)" });
 
-    // 3️⃣ Continue normally
+    // 3️⃣ Insert into Supabase
     const hashed = await bcrypt.hash(password, 10);
     const { data: newUser, error: insertError } = await supabase
       .from("users")
@@ -88,15 +90,45 @@ router.post("/api/register", async (req, res) => {
     if (insertError)
       return res.status(500).json({ message: "Insert error", error: insertError.message });
 
-    // 4️⃣ Create Mongo profile
+    // 4️⃣ Insert into MongoDB
     await User.create({ userId: newUser.id, username: newUser.username });
 
-    res.status(201).json({ message: "User registered", user: newUser });
+    // 5️⃣ Create Neo4j node
+    try {
+          await session.run(
+      `
+      MERGE (u:User {id: $id})
+      SET u.username = $username,
+          u.profilePic = $profilePic,
+          u.pfpPath = $pfpPath,
+          u.created_at = datetime()
+      RETURN u
+      `,
+      {
+        id: String(newUser.id),
+        username: newUser.username,
+        profilePic: null, 
+        pfpPath: null     
+      }
+    );
+
+      console.log(`✅ Neo4j node created for user ${newUser.username}`);
+    } catch (neoErr) {
+      console.error("Neo4j error:", neoErr);
+      // optional: rollback Supabase/Mongo if needed
+    } finally {
+      await session.close();
+    }
+
+    // ✅ All done
+    res.status(201).json({ message: "User registered successfully", user: newUser });
   } catch (err) {
     console.error(err);
+    await session.close();
     res.status(500).json({ message: "Server error", error: err.message });
   }
 });
+
 
 
 
